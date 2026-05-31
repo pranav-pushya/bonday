@@ -1,124 +1,145 @@
 /**
  * crack.js
- * Handles the screen shattering animation and shard physics using DOM SVGs.
+ * 3D Glass Shattering Physics Engine for Three.js
  */
-import { CONFIG, isMobile } from './config.js';
+import * as THREE from 'three';
 
 export class CrackManager {
-    constructor(container) {
-        this.container = container;
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
-        this.centerX = this.width / 2;
-        this.centerY = this.height / 2;
-    }
-
-    createShards() {
-        this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        this.svg.style.position = 'absolute';
-        this.svg.style.top = '0';
-        this.svg.style.left = '0';
-        this.svg.style.width = '100%';
-        this.svg.style.height = '100%';
-        this.svg.style.zIndex = '12';
-        this.svg.style.pointerEvents = 'none';
-
-        const numShards = isMobile() ? CONFIG.CRACK.SHARDS_MOBILE : CONFIG.CRACK.SHARDS_DESKTOP;
-        
-        // Generate radial jagged lines
-        const crackLines = [];
-        const maxDist = Math.max(this.width, this.height) * 1.5;
-
-        for (let i = 0; i < numShards; i++) {
-            const angle = (i / numShards) * Math.PI * 2 + (Math.random() * 0.2 - 0.1);
-            const line = [{ x: this.centerX, y: this.centerY }];
-            
-            let dist = 0;
-            let currentAngle = angle;
-            
-            for (let j = 0; j < 4; j++) {
-                dist += maxDist / 4;
-                currentAngle += (Math.random() * 0.4 - 0.2); // Jagged direction change
-                line.push({
-                    x: this.centerX + Math.cos(currentAngle) * dist,
-                    y: this.centerY + Math.sin(currentAngle) * dist
-                });
-            }
-            crackLines.push(line);
-        }
-
+    constructor(sceneManager) {
+        this.sm = sceneManager;
+        this.scene = this.sm.scene;
         this.shards = [];
-        for (let i = 0; i < numShards; i++) {
-            const line1 = crackLines[i];
-            const line2 = crackLines[(i + 1) % numShards];
-            
-            // Build polygon path tracing outward along line1, then inward along line2
-            let d = `M ${this.centerX},${this.centerY} `;
-            for (let j = 1; j < line1.length; j++) {
-                d += `L ${line1[j].x},${line1[j].y} `;
-            }
-            for (let j = line2.length - 1; j >= 1; j--) {
-                d += `L ${line2[j].x},${line2[j].y} `;
-            }
-            d += 'Z';
-
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute('d', d);
-            path.setAttribute('stroke', '#F0D080'); // var(--gold-light)
-            path.setAttribute('stroke-width', '2');
-            path.setAttribute('fill', 'rgba(240,208,128,0.06)');
-            
-            path.style.opacity = '0';
-            path.style.transformOrigin = `${this.centerX}px ${this.centerY}px`;
-
-            this.svg.appendChild(path);
-            this.shards.push(path);
-        }
-
-        this.container.appendChild(this.svg);
+        this.isCracked = false;
+        
+        // Real Glass Refraction Material
+        this.glassMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            metalness: 0.1,
+            roughness: 0.05,
+            transmission: 1.0, // glass-like refraction
+            ior: 1.5,
+            thickness: 0.5,
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.DoubleSide
+        });
+        
+        // Edge material for the glowing crimson cracks
+        this.edgeMaterial = new THREE.LineBasicMaterial({
+            color: 0xFF1133,
+            transparent: true,
+            opacity: 0.0 // invisible initially
+        });
     }
 
     startCrack() {
-        this.createShards();
-        
-        // Draw progressively from center outward
-        this.shards.forEach((path, index) => {
-            const length = path.getTotalLength ? path.getTotalLength() : this.width * 2;
-            path.setAttribute('stroke-dasharray', length);
-            path.setAttribute('stroke-dashoffset', length);
-            path.style.opacity = '1';
-            path.style.fillOpacity = '0';
+        if (this.isCracked) return;
+        this.isCracked = true;
+
+        // Calculate the camera view size at z=0 plane
+        const dist = this.sm.camera.position.z;
+        const vFov = THREE.MathUtils.degToRad(this.sm.camera.fov);
+        const height = 2 * Math.tan(vFov / 2) * dist;
+        const width = height * this.sm.camera.aspect;
+
+        const hw = width / 2;
+        const hh = height / 2;
+
+        // Random center impact point
+        const cx = (Math.random() - 0.5) * hw * 0.5;
+        const cy = (Math.random() - 0.5) * hh * 0.5;
+
+        // Create radial shards (starburst pattern)
+        const numSlices = 10;
+        const points = [];
+        for (let i = 0; i < numSlices; i++) {
+            const angle = (i / numSlices) * Math.PI * 2 + (Math.random() * 0.3);
+            const ox = Math.cos(angle) * width * 1.5; // extend beyond screen
+            const oy = Math.sin(angle) * height * 1.5;
+            points.push(new THREE.Vector2(ox, oy));
+        }
+
+        // Build 3D Extruded Shapes for each shard
+        for (let i = 0; i < numSlices; i++) {
+            const p1 = points[i];
+            const p2 = points[(i + 1) % numSlices];
             
-            // Stagger each crack over the 150ms window
-            setTimeout(() => {
-                // Force reflow
-                void path.getBoundingClientRect();
-                path.style.transition = `stroke-dashoffset 60ms ease-out, fill-opacity 60ms ease-in`;
-                path.setAttribute('stroke-dashoffset', '0');
-                path.style.fillOpacity = '1';
-            }, index * (150 / this.shards.length)); 
+            const shape = new THREE.Shape();
+            shape.moveTo(cx, cy);
+            shape.lineTo(p1.x, p1.y);
+            shape.lineTo(p2.x, p2.y);
+            shape.lineTo(cx, cy);
+
+            const geo = new THREE.ExtrudeGeometry(shape, {
+                depth: 0.15,
+                bevelEnabled: true,
+                bevelThickness: 0.02,
+                bevelSize: 0.02,
+                bevelSegments: 2
+            });
+
+            // Center geometry so physics rotation spins correctly around centroid
+            geo.computeBoundingBox();
+            const center = new THREE.Vector3();
+            geo.boundingBox.getCenter(center);
+            geo.translate(-center.x, -center.y, -center.z);
+
+            const mesh = new THREE.Mesh(geo, this.glassMaterial.clone());
+            mesh.position.copy(center);
+            mesh.position.z = 0; // sits exactly where the 2D trail was
+            
+            // Add glowing crack lines to edges
+            const edgesGeo = new THREE.EdgesGeometry(geo);
+            const edges = new THREE.LineSegments(edgesGeo, this.edgeMaterial.clone());
+            mesh.add(edges);
+
+            this.scene.add(mesh);
+            
+            this.shards.push({
+                mesh: mesh,
+                vx: (center.x - cx) * 0.02 + (Math.random() - 0.5) * 0.05,
+                vy: (center.y - cy) * 0.02 + (Math.random() - 0.5) * 0.05,
+                vz: Math.random() * 0.15 + 0.05, // push out towards camera
+                rx: (Math.random() - 0.5) * 0.08,
+                ry: (Math.random() - 0.5) * 0.08,
+                rz: (Math.random() - 0.5) * 0.04,
+                falling: false
+            });
+        }
+        
+        // Flash cracks gold instantly upon strike
+        this.shards.forEach(s => {
+            s.mesh.children[0].material.opacity = 1.0;
         });
     }
 
     fall() {
-        this.shards.forEach(path => {
-            const rot = (Math.random() - 0.5) * 30; // ±15deg
-            const duration = CONFIG.TIMELINE.SHARDS_FALL_MIN + Math.random() * (CONFIG.TIMELINE.SHARDS_FALL_MAX - CONFIG.TIMELINE.SHARDS_FALL_MIN);
-            
-            // Exact easing requested
-            path.style.transition = `transform ${duration}ms cubic-bezier(0.25,0.46,0.45,0.94), opacity ${duration}ms ease-in`;
-            
-            requestAnimationFrame(() => {
-                path.style.transform = `rotate(${rot}deg) translateY(120vh)`;
-                path.style.opacity = '0';
-            });
+        this.shards.forEach(s => {
+            s.falling = true;
+            // The glowing cracks extinguish as the glass falls
+            s.mesh.children[0].material.opacity = 0.0; 
         });
+    }
 
-        // Cleanup
-        setTimeout(() => {
-            if (this.svg && this.svg.parentNode) {
-                this.svg.parentNode.removeChild(this.svg);
+    update() {
+        if (!this.isCracked) return;
+        
+        this.shards.forEach(s => {
+            if (s.falling) {
+                s.vy -= 0.01; // Gravity
+                s.mesh.position.x += s.vx;
+                s.mesh.position.y += s.vy;
+                s.mesh.position.z += s.vz;
+                
+                s.mesh.rotation.x += s.rx;
+                s.mesh.rotation.y += s.ry;
+                s.mesh.rotation.z += s.rz;
+                
+                // Fade out shards as they fall away
+                if (s.mesh.position.y < -15) {
+                    s.mesh.material.opacity = Math.max(0, s.mesh.material.opacity - 0.05);
+                }
             }
-        }, CONFIG.TIMELINE.SHARDS_FALL_MAX + 100);
+        });
     }
 }

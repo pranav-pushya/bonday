@@ -21,7 +21,7 @@ export class StrokeManager {
         
         // 2. Glowing Halo Tube (Fakes the bloom while keeping alpha transparent)
         this.haloMaterial = new THREE.MeshBasicMaterial({
-            color: 0xE8943A, // Amber glow
+            color: 0xFF1133, // Ruby/Crimson glow
             transparent: true,
             opacity: 0.5,
             blending: THREE.AdditiveBlending,
@@ -40,7 +40,7 @@ export class StrokeManager {
         this.indicatorHalo = new THREE.Mesh(
             new THREE.SphereGeometry(0.25, 16, 16),
             new THREE.MeshBasicMaterial({ 
-                color: 0xF0D080, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false 
+                color: 0xFF1133, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false 
             })
         );
         this.indicator = new THREE.Group();
@@ -49,11 +49,11 @@ export class StrokeManager {
         this.indicator.visible = false;
         this.scene.add(this.indicator);
 
-        // 4. Champagne Dust (3D Particles)
+        // 4. Silver Dust (3D Particles)
         this.dustParticles = [];
         this.dustGeo = new THREE.SphereGeometry(0.04, 8, 8);
         this.dustMat = new THREE.MeshBasicMaterial({ 
-            color: 0xF0D080, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false 
+            color: 0xE0E5EC, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false 
         });
     }
 

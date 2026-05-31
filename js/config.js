@@ -14,6 +14,7 @@ export const STATES = {
     STUDIO_REVEAL: 'STUDIO_REVEAL',
     RING_LIGHT: 'RING_LIGHT',
     NAME_ASSEMBLE: 'NAME_ASSEMBLE',
+    SCROLL_JOURNEY: 'SCROLL_JOURNEY',
     BIRTHDAY_CARD: 'BIRTHDAY_CARD'
 };
 
@@ -61,10 +62,10 @@ export const CONFIG = {
 
     // Motif Opacities per Phase
     MOTIFS: {
-        PHASE1: 0.18,
-        PHASE2: 0.06,
-        PHASE3: 0.02,
-        PHASE4: 0.15
+        PHASE1: 0.0,
+        PHASE2: 0.0,
+        PHASE3: 0.0,
+        PHASE4: 1.0
     },
 
     // Name Reveal Identity

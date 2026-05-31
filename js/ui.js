@@ -19,7 +19,9 @@ export class UIManager {
             birthdayCard: document.getElementById('birthday-card'),
             roastLines: document.querySelectorAll('.roast-line'),
             warmCloser: document.querySelector('.warm-closer'),
-            summonBtn: document.getElementById('summon-btn')
+            summonBtn: document.getElementById('summon-btn'),
+            unflipBtn: document.getElementById('unflip-btn'),
+            cardInner: document.getElementById('card-inner')
         };
         
         // Confetti Canvas initialization
@@ -33,12 +35,20 @@ export class UIManager {
         this.resize();
         window.addEventListener('resize', () => this.resize());
         
-        // Button Event Listener
+        // Button Event Listeners for 3D Card Flip
         if (this.elements.summonBtn) {
             this.elements.summonBtn.addEventListener('click', (e) => {
-                const rect = e.target.getBoundingClientRect();
-                // Burst from button center
-                this.burstConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                if (this.elements.cardInner) {
+                    this.elements.cardInner.classList.add('is-flipped');
+                }
+            });
+        }
+        
+        if (this.elements.unflipBtn) {
+            this.elements.unflipBtn.addEventListener('click', (e) => {
+                if (this.elements.cardInner) {
+                    this.elements.cardInner.classList.remove('is-flipped');
+                }
             });
         }
     }

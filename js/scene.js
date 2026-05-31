@@ -28,13 +28,19 @@ export class SceneManager {
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.setClearColor(0x000000, 0); // Guaranteed transparent
 
-        // 3. Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        this.scene.add(ambientLight);
+        // Ruby & Velvet Ambient
+        this.ambientLight = new THREE.AmbientLight(0x221111, 2.0); // Dark crimson ambient
+        this.scene.add(this.ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xfff0dd, 1.2);
-        directionalLight.position.set(5, 5, 5);
-        this.scene.add(directionalLight);
+        // Key Light (Platinum/White)
+        this.dirLight = new THREE.DirectionalLight(0xE0E5EC, 3.0);
+        this.dirLight.position.set(5, 5, 5);
+        this.scene.add(this.dirLight);
+
+        // Fill Light (Deep Ruby)
+        this.fillLight = new THREE.DirectionalLight(0x8B0000, 2.0);
+        this.fillLight.position.set(-5, 3, 2);
+        this.scene.add(this.fillLight);
 
         // Handle Resizing
         window.addEventListener('resize', () => this.resize());
