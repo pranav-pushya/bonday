@@ -192,7 +192,7 @@ body.studio-reveal {
     opacity: 0;
     transform: scale(0);
     filter: blur(20px);
-    transition: all 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 800ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 #name-container span.visible {
     opacity: 1;
@@ -205,7 +205,7 @@ body.studio-reveal {
     transform: translateX(-50%); text-align: center;
     font-family: 'Nunito', sans-serif; font-style: italic;
     font-size: clamp(13px, 3vw, 16px); color: var(--cream-dim);
-    opacity: 0; transition: opacity 400ms ease;
+    opacity: 0; transition: opacity 800ms ease;
     z-index: 6; pointer-events: none;
 }
 #subtitle.visible { opacity: 1; }
@@ -213,9 +213,9 @@ body.studio-reveal {
 /* Phase 4 */
 #birthday-card {
     position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%) translateY(80px);
+    transform: translate(-50%, -50%) translateY(40px);
     opacity: 0; display: none; z-index: 20;
-    transition: all 800ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 1200ms cubic-bezier(0.25, 1, 0.5, 1);
     
     width: min(92vw, 480px);
     height: min(88vh, 700px);
@@ -229,7 +229,7 @@ body.studio-reveal {
 .card-inner {
     width: 100%; height: 100%;
     position: relative;
-    transition: transform 1.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transition: transform 1.6s cubic-bezier(0.25, 1, 0.5, 1);
     transform-style: preserve-3d;
 }
 
@@ -279,6 +279,7 @@ body.studio-reveal {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     width: 100%; height: 100%;
+    padding-bottom: 32px;
 }
 
 #card-scroll-area::-webkit-scrollbar { width: 6px; }
@@ -327,14 +328,14 @@ body.studio-reveal {
 .roast-line {
     font-family: 'Nunito', sans-serif; font-size: clamp(14px, 3.5vw, 16px);
     color: var(--cream); line-height: 1.5; margin-bottom: 16px;
-    opacity: 0; transform: translateY(10px); transition: all 0.6s ease;
+    opacity: 0; transform: translateY(10px); transition: all 1.0s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .roast-line.visible { opacity: 1; transform: translateY(0); }
 
 .warm-closer {
     font-family: 'Nunito', sans-serif; font-style: italic; font-size: clamp(15px, 3.8vw, 18px);
     color: var(--cream); text-align: center; margin-bottom: 32px;
-    opacity: 0; transition: opacity 600ms ease;
+    opacity: 0; transition: opacity 1.2s ease;
 }
 .warm-closer.visible { opacity: 1; }
 
@@ -350,11 +351,16 @@ body.studio-reveal {
     color: var(--gold); border: 1px solid var(--gold);
     border-radius: 6px; font-family: 'Fredoka One', cursive;
     font-size: 14px; letter-spacing: 1px;
-    cursor: pointer; transition: all 0.2s ease;
+    cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 #summon-btn:hover, #unflip-btn:hover {
     background: var(--glow);
-    box-shadow: 0 0 15px var(--glow);
+    box-shadow: 0 0 15px var(--glow), 0 0 30px rgba(201, 168, 76, 0.2);
+    transform: translateY(-2px);
+}
+#summon-btn:active, #unflip-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 0 5px var(--glow);
 }
 
 #scroll-indicator {
@@ -373,7 +379,7 @@ body.studio-reveal {
 }
 #scroll-indicator.visible {
     opacity: 1;
-    animation: bounce 2s infinite ease-in-out;
+    animation: bounce 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 #scroll-indicator svg {
     width: 30px;

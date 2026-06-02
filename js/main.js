@@ -8,10 +8,10 @@ import { CameraManager } from './camera.js?v=7';
 import { SceneManager } from './scene.js?v=7';
 import { StrokeManager } from './stroke.js?v=7';
 import { GestureAnalyzer } from './gesture.js?v=7';
-import { CrackManager } from './crack.js?v=9';
-import { MotifManager } from './motifs.js?v=9';
-import { GalaxyManager } from './galaxy.js?v=10';
-import { UIManager } from './ui.js?v=9';
+import { CrackManager } from './crack.js?v=11';
+import { MotifManager } from './motifs.js?v=11';
+import { GalaxyManager } from './galaxy.js?v=11';
+import { UIManager } from './ui.js?v=11';
 
 class App {
     constructor() {
@@ -41,10 +41,17 @@ class App {
         this.cardRevealed = false;
         
         // Listeners for Scroll Journey
-        window.addEventListener('wheel', (e) => this.handleScroll(e.deltaY));
+        window.addEventListener('wheel', (e) => {
+            if (e.target.closest('#birthday-card')) return;
+            this.handleScroll(e.deltaY);
+        });
         let touchStartY = 0;
-        window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; });
+        window.addEventListener('touchstart', (e) => { 
+            if (e.target.closest('#birthday-card')) return;
+            touchStartY = e.touches[0].clientY; 
+        });
         window.addEventListener('touchmove', (e) => {
+            if (e.target.closest('#birthday-card')) return;
             const touchY = e.touches[0].clientY;
             const delta = touchStartY - touchY;
             touchStartY = touchY;
@@ -85,7 +92,7 @@ class App {
             }
 
             const lastProgress = this.scrollProgress;
-            this.scrollProgress += (this.targetScroll - this.scrollProgress) * 0.1;
+            this.scrollProgress += (this.targetScroll - this.scrollProgress) * 0.05;
             scrollVelocity = Math.abs(this.scrollProgress - lastProgress);
             
             // Camera flies forward from z=10 to z=-10
@@ -112,6 +119,7 @@ class App {
             } else if (this.scrollProgress < 0.8 && this.cardRevealed) {
                 this.cardRevealed = false;
                 this.currentState = STATES.SCROLL_JOURNEY; // revert state
+                document.body.style.touchAction = 'none'; // Disable scrolling again
                 const card = document.getElementById('birthday-card');
                 if (card) {
                     card.classList.remove('visible');

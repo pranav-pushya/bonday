@@ -121,6 +121,7 @@ export class UIManager {
 
         const card = this.elements.birthdayCard;
         card.style.display = 'block';
+        document.body.style.touchAction = 'pan-y'; // Allow vertical scroll when card is open
         
         // Force DOM reflow
         void card.offsetWidth; 

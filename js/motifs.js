@@ -214,7 +214,7 @@ export class MotifManager {
             m.wrapper.scale.set(1, 1, stretch);
             
             // Smoothly animate opacity transitions
-            m.currentOpacity += (this.targetOpacity - m.currentOpacity) * 0.05;
+            m.currentOpacity += (this.targetOpacity - m.currentOpacity) * 0.015;
             
             // Increase emissive glow during warp
             const glowPulse = m.currentOpacity + (scrollVelocity * 10);
