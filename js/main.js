@@ -181,6 +181,14 @@ class App {
 
             case STATES.SHARDS_FALL:
                 this.crack.fall();
+                
+                // Play Gen-Z Girl Bday Music
+                const bgm = document.getElementById('bgm');
+                if (bgm) {
+                    bgm.volume = 0.7; // Ensure good background volume
+                    bgm.play().catch(e => console.warn("Audio autoplay blocked by browser:", e));
+                }
+
                 setTimeout(() => {
                     this.transition(STATES.STUDIO_REVEAL);
                 }, CONFIG.TIMELINE.STUDIO_REVEAL_START - CONFIG.TIMELINE.SHARDS_FALL_START);
